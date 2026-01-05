@@ -1,198 +1,178 @@
 <template>
-  <div class="task-board">
-    <header class="board-header">
-      <h1 class="board-title">
-        <el-icon><Grid /></el-icon>
-        任务看板
-      </h1>
-      <div class="board-actions">
-        <el-button type="primary" @click="handleAddTask(null)">
-          <el-icon><Plus /></el-icon>
-          新增任务
-        </el-button>
-        <el-button @click="showExportModal = true">
-          <el-icon><Download /></el-icon>
-          导出数据
-        </el-button>
-        <el-button @click="handleClearAll" type="danger" plain>
-          <el-icon><Delete /></el-icon>
-          清空所有
-        </el-button>
-      </div>
-    </header>
-    
-    <div v-if="store.isLoading" class="loading-state">
-      <el-icon class="loading-icon"><Loading /></el-icon>
-      <span>加载中...</span>
-    </div>
-    
-    <template v-else>
-      <TaskStats />
+  <div class="app-container">
+    <el-container>
+      <el-aside width="220px" class="app-aside" :class="{ 'is-collapsed': isCollapsed }">
+        <div class="aside-header">
+          <el-icon class="logo-icon"><Grid /></el-icon>
+          <span v-show="!isCollapsed" class="logo-text">任务看板</span>
+        </div>
+        
+        <el-menu
+          :default-active="activeRoute"
+          class="aside-menu"
+          :collapse="isCollapsed"
+          router
+        >
+          <el-menu-item index="/">
+            <el-icon><HomeFilled /></el-icon>
+            <template #title>首页</template>
+          </el-menu-item>
+          
+          <el-menu-item index="/tasks">
+            <el-icon><Document /></el-icon>
+            <template #title>任务列表</template>
+          </el-menu-item>
+          
+          <el-menu-item index="/stats">
+            <el-icon><DataAnalysis /></el-icon>
+            <template #title>数据统计</template>
+          </el-menu-item>
+        </el-menu>
+        
+        <div class="aside-footer">
+          <el-button
+            class="collapse-btn"
+            :icon="isCollapsed ? 'Expand' : 'Fold'"
+            @click="toggleCollapse"
+            :title="isCollapsed ? '展开菜单' : '收起菜单'"
+          />
+        </div>
+      </el-aside>
       
-      <div class="board-columns">
-        <TaskColumn
-          v-for="column in store.columns"
-          :key="column.id"
-          :column="column"
-          @add-task="handleAddTask"
-          @edit-task="handleEditTask"
-        />
-      </div>
-    </template>
-    
-    <TaskFormModal
-      v-model="formModalVisible"
-      :task="currentTask"
-      :column-id="currentColumnId"
-      @save="handleSaveTask"
-    />
-    
-    <ExportModal v-model="showExportModal" />
+      <el-container>
+        <el-main class="app-main">
+          <router-view v-slot="{ Component }">
+            <transition name="fade" mode="out-in">
+              <component :is="Component" />
+            </transition>
+          </router-view>
+        </el-main>
+      </el-container>
+    </el-container>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { Grid, Plus, Download, Delete, Loading } from '@element-plus/icons-vue'
-import { useTaskStore } from './stores/taskStore'
-import TaskStats from './components/TaskStats.vue'
-import TaskColumn from './components/TaskColumn.vue'
-import ExportModal from './components/ExportModal.vue'
-import TaskFormModal from './components/TaskFormModal.vue'
-import { ElMessage, ElMessageBox } from 'element-plus'
+import { ref, computed } from 'vue'
+import { useRoute } from 'vue-router'
+import { Grid, HomeFilled, Document, DataAnalysis, Expand, Fold } from '@element-plus/icons-vue'
 
-const store = useTaskStore()
+const route = useRoute()
+const isCollapsed = ref(false)
 
-const formModalVisible = ref(false)
-const showExportModal = ref(false)
-const currentTask = ref(null)
-const currentColumnId = ref(null)
+const activeRoute = computed(() => route.path)
 
-onMounted(() => {
-  store.init()
-})
-
-const handleAddTask = (columnId) => {
-  currentTask.value = null
-  currentColumnId.value = columnId || 'todo'
-  formModalVisible.value = true
-}
-
-const handleEditTask = (task) => {
-  currentTask.value = { ...task }
-  currentColumnId.value = null
-  formModalVisible.value = true
-}
-
-const handleSaveTask = (taskData) => {
-  if (currentTask.value) {
-    store.updateTask(currentTask.value.id, taskData)
-    ElMessage.success('任务已更新')
-  } else {
-    store.addTask(currentColumnId.value, taskData)
-    ElMessage.success('任务已创建')
-  }
-  formModalVisible.value = false
-  currentTask.value = null
-}
-
-const handleClearAll = async () => {
-  try {
-    await ElMessageBox.confirm(
-      '确定要清空所有任务吗？此操作不可恢复。',
-      '确认清空',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }
-    )
-    
-    store.columns.forEach(col => {
-      col.tasks = []
-    })
-    store.saveToStorage()
-    ElMessage.success('所有任务已清空')
-  } catch {
-    // 用户取消
-  }
+const toggleCollapse = () => {
+  isCollapsed.value = !isCollapsed.value
 }
 </script>
 
 <style scoped>
-.task-board {
-  padding: 20px;
-  max-width: 1400px;
-  margin: 0 auto;
+.app-container {
+  height: 100vh;
 }
 
-.board-header {
+.app-aside {
+  background: linear-gradient(180deg, #304156 0%, #1f2d3d 100%);
+  transition: width 0.3s;
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  padding: 16px 24px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  flex-direction: column;
 }
 
-.board-title {
-  font-size: 24px;
-  font-weight: 600;
-  color: #333;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin: 0;
+.app-aside.is-collapsed {
+  width: 64px !important;
 }
 
-.board-actions {
-  display: flex;
-  gap: 12px;
-}
-
-.board-columns {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 20px;
-}
-
-.loading-state {
+.aside-header {
+  height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 12px;
-  padding: 60px;
-  background: white;
-  border-radius: 12px;
-  color: #909399;
-  font-size: 16px;
+  padding: 0 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-.loading-icon {
-  font-size: 24px;
-  animation: spin 1s linear infinite;
+.logo-icon {
+  font-size: 28px;
+  color: #409eff;
 }
 
-@keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+.logo-text {
+  margin-left: 10px;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.aside-menu {
+  flex: 1;
+  border-right: none;
+  background: transparent;
+}
+
+.aside-menu:not(.el-menu--collapse) {
+  width: 220px;
+}
+
+:deep(.el-menu-item),
+:deep(.el-sub-menu__title) {
+  color: #a0a4b0;
+}
+
+:deep(.el-menu-item:hover),
+:deep(.el-sub-menu__title:hover) {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+:deep(.el-menu-item.is-active) {
+  color: #409eff;
+  background: rgba(64, 158, 255, 0.1);
+}
+
+.aside-footer {
+  padding: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.collapse-btn {
+  width: 100%;
+  background: transparent;
+  border: none;
+  color: #a0a4b0;
+}
+
+.collapse-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.app-main {
+  background: #f5f7fa;
+  padding: 0;
+  overflow-y: auto;
+}
+
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.2s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
 }
 
 @media (max-width: 768px) {
-  .board-header {
-    flex-direction: column;
-    gap: 16px;
+  .app-aside {
+    position: fixed;
+    z-index: 1000;
+    height: 100%;
   }
   
-  .board-actions {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .board-columns {
-    grid-template-columns: 1fr;
+  .app-aside.is-collapsed {
+    width: 0 !important;
+    overflow: hidden;
   }
 }
 </style>
