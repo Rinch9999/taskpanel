@@ -1,0 +1,288 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+  color: #333;
+}
+
+#app {
+  min-height: 100vh;
+}
+
+.task-board {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.board-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+  padding: 16px 24px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.board-title {
+  font-size: 24px;
+  font-weight: 600;
+  color: #333;
+}
+
+.board-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.board-columns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.task-column {
+  background: #f5f7fa;
+  border-radius: 12px;
+  padding: 16px;
+  min-height: 500px;
+  display: flex;
+  flex-direction: column;
+}
+
+.column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 2px solid #e4e7ed;
+}
+
+.column-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.column-count {
+  background: #409eff;
+  color: white;
+  padding: 2px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+
+.task-list {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 200px;
+  padding: 4px;
+}
+
+.task-card {
+  background: white;
+  border-radius: 8px;
+  padding: 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  cursor: grab;
+  transition: all 0.3s ease;
+  border-left: 4px solid transparent;
+}
+
+.task-card:hover {
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  transform: translateY(-2px);
+}
+
+.task-card.dragging {
+  opacity: 0.8;
+  transform: rotate(3deg);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+}
+
+.task-card.priority-high {
+  border-left-color: #f56c6c;
+}
+
+.task-card.priority-medium {
+  border-left-color: #e6a23c;
+}
+
+.task-card.priority-low {
+  border-left-color: #67c23a;
+}
+
+.task-card.expired {
+  background: #fef0f0;
+  border-color: #f56c6c;
+}
+
+.task-card.due-soon {
+  background: #fdf6ec;
+  border-color: #e6a23c;
+}
+
+.task-title {
+  font-size: 15px;
+  font-weight: 500;
+  color: #303133;
+  margin-bottom: 8px;
+}
+
+.task-description {
+  font-size: 13px;
+  color: #606266;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.task-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+}
+
+.task-priority {
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+.task-priority.priority-high {
+  background: #fef0f0;
+  color: #f56c6c;
+}
+
+.task-priority.priority-medium {
+  background: #fdf6ec;
+  color: #e6a23c;
+}
+
+.task-priority.priority-low {
+  background: #f0f9eb;
+  color: #67c23a;
+}
+
+.task-due-date {
+  color: #909399;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.task-due-date.expired {
+  color: #f56c6c;
+}
+
+.task-due-date.due-soon {
+  color: #e6a23c;
+}
+
+.add-task-btn {
+  margin-top: 12px;
+  width: 100%;
+}
+
+.stats-section {
+  background: white;
+  border-radius: 12px;
+  padding: 20px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.stats-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #303133;
+  margin-bottom: 16px;
+}
+
+.stats-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 20px;
+}
+
+.stat-item {
+  text-align: center;
+}
+
+.stat-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: #409eff;
+}
+
+.stat-label {
+  font-size: 14px;
+  color: #909399;
+  margin-top: 4px;
+}
+
+.stat-item.completed .stat-value {
+  color: #67c23a;
+}
+
+.stat-item.rate .stat-value {
+  color: #e6a23c;
+}
+
+.placeholder-pulse {
+  background: #e4e7ed;
+  border-radius: 8px;
+  min-height: 100px;
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.drag-handle {
+  cursor: grab;
+}
+
+.drag-handle:active {
+  cursor: grabbing;
+}
+
+@media (max-width: 768px) {
+  .board-header {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .board-columns {
+    grid-template-columns: 1fr;
+  }
+  
+  .task-column {
+    min-height: 400px;
+  }
+}
+
+.el-message {
+  z-index: 9999 !important;
+}
